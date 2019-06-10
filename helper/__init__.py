@@ -19,7 +19,7 @@ def store_email():
   messages = results.get('messages', [])
   senders = []
   msg_details = []
-  for index in range(0, 10):
+  for index in range(0, 32):
     message = messages[index]
     msg = service.users().messages().get(userId='me', id=message['id']).execute()
     msg_headers=msg["payload"]["headers"]
@@ -36,10 +36,36 @@ def store_email():
       })
   return msg_details
 
-def filter_emailid(email_id):
-  if db.email_exist(email_id):
-    email_details = db.get_details(email_id)
-    return email_details
-  return {
-    'message' : 'Email id not found'
-  }
+def filter_all(email_id, contains):
+  response = []
+  subjects = db.get_subject(email_id)
+  for subject in subjects:
+    words = subject[0].split(' ')
+    for word in words:
+      if word == contains:
+        response.append({
+          "sender" : email_id,
+          "subject" : subject[0]
+        })
+  return response
+
+def filter_any(email_id, contains):
+  response = []
+  email_subjects = db.get_subject(email_id)
+  for email_subject in email_subjects:
+    response.append({
+      "sender" : email_id,
+      "subject" : email_subject[0]
+    })
+  subjects = db.get_all_subject()
+  for subject in subjects:
+    words = subject[0].split(' ')
+    sender = db.get_email(subject[0])
+    for word in words:
+      if word == contains:
+        response.append({
+          "sender" : sender[0],
+          "subject" : subject[0]
+        })
+  result = [index for length, index in enumerate(response) if index not in response[length + 1:]] 
+  return (result)

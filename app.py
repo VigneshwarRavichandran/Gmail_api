@@ -10,11 +10,18 @@ def store():
 		'message' : 'Inbox messages stored in database'
 	})
 
-@app.route('/filter1', methods=['POST'])
-def filter1():
+@app.route('/filter', methods=['POST'])
+def filter():
 	data = request.get_json()
-	email_id = data['email_id']
-	response = filter_emailid(email_id)
+	predicate = data['predicate']
+	email_id = data['filter']['from']
+	contains = data['filter']['contains']
+	days = data['filter']['less_than']
+	response = None
+	if predicate == 'ALL':
+		response = filter_all(email_id, contains)
+	elif predicate == 'ANY':
+		response = filter_any(email_id, contains)
 	return jsonify(response)
 
 
