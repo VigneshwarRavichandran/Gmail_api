@@ -20,9 +20,9 @@ def filter():
 	action = data['action']
 	response = None
 	if predicate == 'ALL':
-		filter_all(email_id, contains, days)
+		filter_all(email_id, contains, days, action)
 	elif predicate == 'ANY':
-		filter_any(email_id, contains, days)
+		filter_any(email_id, contains, days, action)
 	return jsonify({
 		"message" : "Action performed successfully"
 	})

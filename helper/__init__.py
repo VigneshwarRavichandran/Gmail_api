@@ -29,7 +29,7 @@ def store_email():
     date = [i['value'] for i in msg_headers if i["name"]=="Date"]
     db.store(sender[0], date[0], subject[0], message, message_id)
 
-def filter_all(email_id, contains, days):
+def filter_all(email_id, contains, days, action):
   mail_ids = []
   contents = db.get_content(email_id)
   for content in contents:
@@ -52,10 +52,13 @@ def filter_all(email_id, contains, days):
         if date > limit:
           mail_ids.append(mail_id)
           # print(mail_subject, mail_date, mail_id)
-  service.users().messages().batchModify(userId='me', body={'addLabelIds': ['UNREAD'], 'ids': mail_ids}).execute()
+  if action == "UNREAD":
+    service.users().messages().batchModify(userId='me', body={'addLabelIds': ['UNREAD'], 'ids': mail_ids}).execute()
+  elif action == "READ":
+    service.users().messages().batchModify(userId='me', body={'removeLabelIds': ['UNREAD'], 'ids': mail_ids}).execute()
 
 
-def filter_any(email_id, contains, days):
+def filter_any(email_id, contains, days, action):
   mail_ids = []
   contents = db.get_all_content()
   for content in contents:
@@ -80,18 +83,7 @@ def filter_any(email_id, contains, days):
         word_contain = True
     if mail_sender == email_id or date > limit or word_contain == True:
       mail_ids.append(mail_id)
-  service.users().messages().batchModify(userId='me', body={'addLabelIds': ['UNREAD'], 'ids': mail_ids}).execute()
-
-def mail_action():
-  store = file.Storage('token.json')
-  creds = store.get()
-  if not creds or creds.invalid:
-    flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
-    creds = tools.run_flow(flow, store)
-  service = build('gmail', 'v1', http=creds.authorize(Http()))
-  results = service.users().messages().list(userId='me').execute()
-  messages = results.get('messages', [])
-  message = messages[0]
-  msg = service.users().messages().get(userId='me', id=message['id']).execute()
-  print(msg['snippet'])
-  service.users().messages().modify(userId='me', id=message['id'], body={'addLabelIds': ['UNREAD']}).execute()
+  if action == "UNREAD":
+    service.users().messages().batchModify(userId='me', body={'addLabelIds': ['UNREAD'], 'ids': mail_ids}).execute()
+  elif action == "READ":
+    service.users().messages().batchModify(userId='me', body={'removeLabelIds': ['UNREAD'], 'ids': mail_ids}).execute()
