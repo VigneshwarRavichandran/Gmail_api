@@ -31,7 +31,7 @@ class EmailDb:
   def get_content(self, email_id):
     cur = self.db_connect()
     if cur:
-      result = cur.execute("SELECT date,subject FROM mail WHERE sender = '{0}'".format(email_id))
+      result = cur.execute("SELECT date,subject,message_id FROM mail WHERE sender = '{0}'".format(email_id))
       if result == 0:
         return {
           "message" : "No such sender in your INBOX"
@@ -56,7 +56,7 @@ class EmailDb:
   def get_all_content(self):
     cur = self.db_connect()
     if cur:
-      result = cur.execute("SELECT sender,date,subject FROM mail")
+      result = cur.execute("SELECT sender,date,subject,message_id FROM mail")
       return(cur.fetchall())
     raise ConnectionError()
 

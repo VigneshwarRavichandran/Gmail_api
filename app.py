@@ -17,19 +17,16 @@ def filter():
 	email_id = data['filter']['from']
 	contains = data['filter']['contains']
 	days = data['filter']['less_than']
+	action = data['action']
 	response = None
 	if predicate == 'ALL':
-		response = filter_all(email_id, contains, days)
+		filter_all(email_id, contains, days)
 	elif predicate == 'ANY':
-		response = filter_any(email_id, contains, days)
-	return jsonify(response)
-
-@app.route('/action', methods=['POST'])
-def action():
-	mail_action()
+		filter_any(email_id, contains, days)
 	return jsonify({
-		'message' : 'action'
+		"message" : "Action performed successfully"
 	})
+
 
 
 if __name__ == '__main__':

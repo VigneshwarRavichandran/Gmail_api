@@ -1,22 +1,15 @@
-from googleapiclient import errors
+from httplib2 import Http
+from oauth2client import file, client, tools
+from googleapiclient.discovery import build
 
 
-def ListLabels(service, user_id):
-  """Get a list all labels in the user's mailbox.
-
-  Args:
-    service: Authorized Gmail API service instance.
-    user_id: User's email address. The special value "me"
-    can be used to indicate the authenticated user.
-
-  Returns:
-    A list all Labels in the user's mailbox.
-  """
-  try:
-    response = service.users().labels().list(userId=user_id).execute()
-    labels = response['labels']
-    for label in labels:
-      print('Label id: %s - Label name: %s' % (label['id'], label['name']))
-    return labels
-  except errors.HttpError, error:
-    print('An error occurred: %s' % error)
+store = file.Storage('token.json')
+creds = store.get()
+if not creds or creds.invalid:
+    flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+    creds = tools.run_flow(flow, store)
+service = build('gmail', 'v1', http=creds.authorize(Http()))
+results = service.users().messages().list(userId='me').execute()
+messages = results.get('messages', [])
+message = service.users().messages().get(userId='me', id=messages[0]['id']).execute()
+print('Message snippet: %s' % message['snippet'])
