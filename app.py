@@ -7,26 +7,30 @@ app = Flask(__name__)
 def store():
 	response = store_email()
 	return jsonify({
-		'message' : 'Inbox messages stored in database'
+		'message' : response
 	})
 
 @app.route('/filter', methods=['POST'])
 def filter():
-	data = request.get_json()
-	predicate = data['predicate']
-	email_id = data['filter']['from']
-	contains = data['filter']['contains']
-	days = data['filter']['less_than']
-	action = data['action']
+	try:
+		data = request.get_json()
+		predicate = data['predicate']
+		email_id = data['filter']['from']
+		contains = data['filter']['contains']
+		days = data['filter']['less_than']
+		action = data['action']
+	except:
+		return jsonify({
+			"message" : "Provide all the necessary fields!"
+		})
 	response = None
 	if predicate == 'ALL':
-		filter_all(email_id, contains, days, action)
+		response = filter_all(email_id, contains, days, action)
 	elif predicate == 'ANY':
-		filter_any(email_id, contains, days, action)
+		response = filter_any(email_id, contains, days, action)
 	return jsonify({
-		"message" : "Action performed successfully"
+		"message" : response
 	})
-
 
 
 if __name__ == '__main__':

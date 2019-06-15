@@ -17,46 +17,25 @@ class EmailDb:
     except:
       return None
 
-  def store(self, sender, date, subject, message, message_id):
+  def store(self, message_id, sender, date, subject):
     cur = self.db_connect()
     if cur:
-      sender = sender.split('<')
-      sender = sender[len(sender)-1]
-      email_id = sender[0:len(sender)-1]
-      cur.execute("INSERT INTO mail(sender, date, subject, message, message_id) VALUES('{0}', '{1}', '{2}', '{3}', '{4}')".format(email_id, date[0:1000], subject[0:2000], message[0:6000], message_id))
+      cur.execute("INSERT INTO mail(sender, date, subject, message_id) VALUES('{0}', '{1}', '{2}', '{3}')".format(sender, date, subject[0:2000], message_id))
       self.conn.commit()
     else:  
       raise ConnectionError()
 
-  def get_content(self, email_id):
+  def contain_any(self, sender, date, subject):
     cur = self.db_connect()
     if cur:
-      result = cur.execute("SELECT date,subject,message_id FROM mail WHERE sender = '{0}'".format(email_id))
-      if result == 0:
-        return {
-          "message" : "No such sender in your INBOX"
-        }
+      cur.execute("SELECT message_id FROM mail WHERE date >= '{0}' or sender = '{1}' or subject LIKE '%{2}%'".format(date, sender, subject))
       return(cur.fetchall())
     raise ConnectionError()
 
-  def get_all_subject(self):
+  def contain_all(self, sender, date, subject):
     cur = self.db_connect()
     if cur:
-      cur.execute("SELECT subject FROM mail")
-      return(cur.fetchall())
-    raise ConnectionError()
-
-  def get_email(self, subject):
-    cur = self.db_connect()
-    if cur:
-      result = cur.execute("SELECT sender FROM mail WHERE subject = '{0}'".format(subject))
-      return(cur.fetchone())
-    raise ConnectionError()
-
-  def get_all_content(self):
-    cur = self.db_connect()
-    if cur:
-      result = cur.execute("SELECT sender,date,subject,message_id FROM mail")
+      cur.execute("SELECT message_id FROM mail WHERE date >= '{0}' and sender = '{1}' and subject LIKE '%{2}%'".format(date, sender, subject))
       return(cur.fetchall())
     raise ConnectionError()
 
