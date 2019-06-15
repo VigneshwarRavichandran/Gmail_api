@@ -1,0 +1,10 @@
+{
+	"predicate" : "ANY",
+	"filter" : 
+	{
+		"from" : "friends@placementseason.com",
+		"contains" : "2020",
+		"less_than" : "5"
+	},
+	"action" : "READ"
+}
